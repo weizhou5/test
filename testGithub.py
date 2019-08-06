@@ -17,7 +17,7 @@ branchKey = "branch"
 pathKey = "path"
 contentKey = "content"
 rpKey = "rp"
-namespace = ""
+global namespace
 global args
 args = dict()
 def getTreesha(token,host,projectName,branch):
@@ -63,15 +63,22 @@ def uploadFile(token,host,projectName,branch,commitMsg,filePath,content):
         params = {'branch': '{}'.format(branch),'message': '{}'.format(commitMsg).format(commitMsg),'content': '{}'.format(base64.b64encode(content))}
         resp = requests.put(url,data=json.dumps(params),headers=headers)
         print(resp.text)
-def checkTokenAndHost(token,host):
+def getNamespace(token,host):
     headers={'Authorization': 'token {}'.format(token)}
     url = "{}/user".format(host)
     try:
         resp = requests.get(url,headers=headers)
         print(resp.text)
         data = json.loads(resp.text)
-        namespace = data['login']
-        print(namespace)
+        return data['login']
+    except Exception as e:
+        print("token or host error!")
+        sys.exit(1)
+def checkTokenAndHost(token,host):
+    headers={'Authorization': 'token {}'.format(token)}
+    url = "{}/user".format(host)
+    try:
+        resp = requests.get(url,headers=headers)
     except Exception as e:
         print("token or host error!")
         sys.exit(1)
@@ -156,7 +163,8 @@ if __name__ == "__main__":
     status = checkArgs()
     if status == True:
         if readFile(args[pathKey]) == True:
-            uploadFile(args[tokenKey], args[hostKey], args[projectKey], args[branchKey], args[msgKey], args[rpKey], args[contentKey])
+            projectName = '{}/{}'.format(getNamespace(args[tokenKey],args[hostKey]),args[projectKey])
+            uploadFile(args[tokenKey], args[hostKey], projectName, args[branchKey], args[msgKey], args[rpKey], args[contentKey])
     #        if isExistFile(args[tokenKey], args[hostKey], args[projectKey], args[rpKey], args[branchKey]) == True:
     #            uploadFile(args[tokenKey], args[hostKey], args[projectKey], args[branchKey], args[msgKey], "update", args[rpKey], args[contentKey])
     #        else:
