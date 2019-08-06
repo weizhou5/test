@@ -170,6 +170,8 @@ def readFile(path):
     finally:
         fileobj.close()
     return status
+def printUsage(msg):
+    print("{} Usage:-token token -host hostAddress -project projectName -branch gitLab branch -msg commit message -path upload file path -rp remote path".format(msg))
 if __name__ == "__main__":
     #print(getTreeSha("ec1e6170c79ec0df26a43b1544657142cd1ae0fe","https://api.github.com","weizhou5/test","master"))
     #print(getTree("ec1e6170c79ec0df26a43b1544657142cd1ae0fe","https://api.github.com","weizhou5/test","master"))
@@ -181,6 +183,12 @@ if __name__ == "__main__":
         if readFile(args[pathKey]) == True:
             projectName = '{}/{}'.format(getNamespace(args[tokenKey],args[hostKey]),args[projectKey])
             uploadFile(args[tokenKey], args[hostKey], projectName, args[branchKey], args[msgKey], args[rpKey], args[contentKey])
+        else:
+            print("Failed to read file!")
+            sys.exit(1)
+    else:
+        printUsage("parameter error!")
+        sys.exit(1)
     #        if isExistFile(args[tokenKey], args[hostKey], args[projectKey], args[rpKey], args[branchKey]) == True:
     #            uploadFile(args[tokenKey], args[hostKey], args[projectKey], args[branchKey], args[msgKey], "update", args[rpKey], args[contentKey])
     #        else:
