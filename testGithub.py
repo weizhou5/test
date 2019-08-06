@@ -23,19 +23,27 @@ args = dict()
 def getTreesha(token,host,projectName,branch):
     headers={'Authorization': 'token {}'.format(token)}
     url = "{}/repos/{}/branches/{}".format(host,projectName,branch)
-    resp = requests.get(url,headers=headers)
-    result = json.loads(resp.text)
-    treeSha = result['commit']['commit']['tree']['sha']
-    return treeSha
+    try:
+        resp = requests.get(url,headers=headers)
+        result = json.loads(resp.text)
+        treeSha = result['commit']['commit']['tree']['sha']
+        return treeSha
+    except Exception as e:
+        print('get tree sha error!')
+        sys.exit(1)
 
 def getTree(token,host,projectName,branch):
     treeSha = getTreesha(token,host,projectName,branch)
     headers={'Authorization': 'token {}'.format(token)}
     url = "{}/repos/{}/git/trees/{}?recursive=1".format(host,projectName,treeSha)
-    resp = requests.get(url,headers=headers)
-    data = json.loads(resp.text)
-    result = [(d['path'], d['type']) for d in data['tree']]
-    return result
+    try:
+        resp = requests.get(url,headers=headers)
+        data = json.loads(resp.text)
+        result = [(d['path'], d['type']) for d in data['tree']]
+        return result
+    except Exception as e:
+        print('get tree error!')
+        sys.exit(1)
 
 def isExistFile(token,host,projectName,filePath,branch):
     tree = getTree(token,host,projectName,branch)
@@ -47,22 +55,30 @@ def isExistFile(token,host,projectName,filePath,branch):
 def getFilesha(token,host,projectName,filePath,branch):
     headers={'Authorization': 'token {}'.format(token)}
     url = "{}/repos/{}/contents/{}?ref={}".format(host,projectName,filePath,branch)
-    resp = requests.get(url,headers=headers)
-    result = json.loads(resp.text)
-    return result['sha']
+    try:
+        resp = requests.get(url,headers=headers)
+        result = json.loads(resp.text)
+        return result['sha']
+    except Exception as e:
+        print('get file sha error!')
+        sys.exit(1)
 
 def uploadFile(token,host,projectName,branch,commitMsg,filePath,content):
     headers={'Authorization': 'token {}'.format(token)}
     url = "{}/repos/{}/contents/{}".format(host,projectName,filePath)
-    if isExistFile(token,host,projectName,filePath,branch):
-        sha = getFilesha(token,host,projectName,filePath,branch)
-        params = {'branch': '{}'.format(branch),'message': '{}'.format(commitMsg),'content': '{}'.format(base64.b64encode(content)),'sha': '{}'.format(sha)}
-        resp = requests.put(url,data=json.dumps(params),headers=headers)
-        print(resp.text)
-    else:
-        params = {'branch': '{}'.format(branch),'message': '{}'.format(commitMsg).format(commitMsg),'content': '{}'.format(base64.b64encode(content))}
-        resp = requests.put(url,data=json.dumps(params),headers=headers)
-        print(resp.text)
+    try:
+        if isExistFile(token,host,projectName,filePath,branch):
+            sha = getFilesha(token,host,projectName,filePath,branch)
+            params = {'branch': '{}'.format(branch),'message': '{}'.format(commitMsg),'content': '{}'.format(base64.b64encode(content)),'sha': '{}'.format(sha)}
+            resp = requests.put(url,data=json.dumps(params),headers=headers)
+            print(resp.text)
+        else:
+            params = {'branch': '{}'.format(branch),'message': '{}'.format(commitMsg).format(commitMsg),'content': '{}'.format(base64.b64encode(content))}
+            resp = requests.put(url,data=json.dumps(params),headers=headers)
+            print(resp.text)
+    except Exception as e:
+        print('upload file error!')
+        sys.exit(1)
 def getNamespace(token,host):
     headers={'Authorization': 'token {}'.format(token)}
     url = "{}/user".format(host)
