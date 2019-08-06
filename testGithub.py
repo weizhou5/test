@@ -17,6 +17,7 @@ branchKey = "branch"
 pathKey = "path"
 contentKey = "content"
 rpKey = "rp"
+namespace = ""
 global args
 args = dict()
 def getTreesha(token,host,projectName,branch):
@@ -63,15 +64,17 @@ def uploadFile(token,host,projectName,branch,commitMsg,filePath,content):
         resp = requests.put(url,data=json.dumps(params),headers=headers)
         print(resp.text)
 def checkTokenAndHost(token,host):
-    print('token:{},host:{}'.format(token,host))
     headers={'Authorization': 'token {}'.format(token)}
     url = "{}/user".format(host)
-    print(url)
     try:
         resp = requests.get(url,headers=headers)
         print(resp.text)
+        data = json.loads(resp.text)
+        namespace = data['login']
+        print(namespace)
     except Exception as e:
-        print(e)
+        print("token or host error!")
+        sys.exit(1)
 def checkArgs():
     if len(sys.argv) != 15:
         return False
