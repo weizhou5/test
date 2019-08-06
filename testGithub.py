@@ -62,6 +62,16 @@ def uploadFile(token,host,projectName,branch,commitMsg,filePath,content):
         params = {'branch': '{}'.format(branch),'message': '{}'.format(commitMsg).format(commitMsg),'content': '{}'.format(base64.b64encode(content))}
         resp = requests.put(url,data=json.dumps(params),headers=headers)
         print(resp.text)
+def checkTokenAndHost(token,host):
+    print('token:{},host:{}'.format(token,host))
+    headers={'Authorization': 'token {}'.format(token)}
+    url = "{}/user".format(host)
+    print(url)
+    try:
+        resp = requests.get(url,headers=headers)
+        print(resp.text)
+    except Exception as e:
+        print(e)
 def checkArgs():
     if len(sys.argv) != 15:
         return False
@@ -122,6 +132,7 @@ def checkArgs():
             if len(args[rpKey]) == 0:
                 print ("branch is empty!")
                 return False
+    checkTokenAndHost(args[tokenKey],args[hostKey])
     return True
 def readFile(path):
     status = False
